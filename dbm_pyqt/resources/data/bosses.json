@@ -1,0 +1,68 @@
+[
+    {
+        "id": 1,
+        "name": "首领A",
+        "description": "这是一个强大的首领A，拥有多种危险技能。",
+        "skills": [
+          {
+            "name": "技能1：高伤害单体攻击",
+            "trigger_condition": "unconditional",
+            "countdown_duration": 15,
+            "progress_bar_text": "单体高伤",
+            "progress_bar_color": "red"
+          },
+          {
+            "name": "技能2：范围 AoE 伤害",
+            "trigger_condition": "unconditional",
+            "countdown_duration": 20,
+            "progress_bar_text": "躲避AoE",
+            "progress_bar_color": "#FFA500"
+          },
+          {
+            "name": "技能3：召唤小怪",
+            "trigger_condition": "unconditional",
+            "countdown_duration": 30,
+            "progress_bar_text": "打断召唤",
+            "progress_bar_color": "blue"
+          }
+        ]
+      },
+    {
+      "id": 2,
+      "name": "首领B",
+      "description": "首领B擅长控制技能，需要注意躲避。",
+      "skills": [
+        {
+          "name": "技能1：群体控制",
+          "trigger_condition": "unconditional",
+          "countdown_duration": 10,
+          "progress_bar_text": "注意控制"
+        },
+        {
+          "name": "技能2：降低移动速度",
+          "trigger_condition": "time",
+          "countdown_duration": 12,
+          "progress_bar_text": "减速躲避"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "首领C",
+      "description": "这是一个速度很快的首领C，需要快速反应。",
+      "skills": [
+        {
+          "name": "技能1：快速移动",
+          "trigger_condition": "unconditional",
+          "countdown_duration": 8,
+          "progress_bar_text": "快速移动"
+        },
+        {
+          "name": "技能2：连续攻击",
+          "trigger_condition": "time",
+          "countdown_duration": 5,
+          "progress_bar_text": "连续攻击"
+        }
+      ]
+    }
+  ]
