@@ -1,6 +1,8 @@
 # src/gui/windows/timer_overlay_window.py
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QProgressBar
 from PyQt5.QtCore import Qt, QTimer, QThread, pyqtSignal, QPoint
+from src.utils.image_utils import detect_image_on_screen
+
 
 class TimerOverlayWindow(QWidget):
     def __init__(self):
@@ -97,13 +99,14 @@ class TimerOverlayWindow(QWidget):
 
 
 class SkillTimer:
-    def __init__(self, skill_name, duration_seconds, overlay_window, progress_bar_text="", progress_bar_color=None): # 添加 progress_bar_color 参数，默认值为 None
+    def __init__(self, skill_name, duration_seconds, overlay_window, main_window, progress_bar_text="", progress_bar_color=None, show=True): # 添加 progress_bar_color 参数，默认值为 None
         self.duration_update_scale = 10;
         self.timer_interval = 10
 
         self.skill_name = skill_name
         self.duration_seconds = duration_seconds
         self.overlay_window = overlay_window
+        self.main_window = main_window
         self.progress_bar_text = progress_bar_text
 
         self.progress_bar = QProgressBar()
@@ -118,7 +121,10 @@ class SkillTimer:
         if progress_bar_color: # 如果 progress_bar_color 参数有效
             self.set_progress_bar_color(progress_bar_color) # 调用新的方法设置颜色
 
+        self.show_progress_bar = show  #  保存 show 字段的值，决定是否显示进度条 <--- 保存 show 值
+
         self.timer = QTimer()
+        self.timer.setTimerType(Qt.PreciseTimer);
         self.timer.timeout.connect(self.update_progress)
         self.elapsed_seconds = 0
         self.is_running = False
@@ -149,8 +155,12 @@ class SkillTimer:
             self.is_running = True
             self.elapsed_seconds = 0
             self.elapsed_milliseconds = 0
-            self.overlay_window.add_timer_progress_bar(self)
+            if self.show_progress_bar:
+                self.overlay_window.add_timer_progress_bar(self)
+            else:
+                self.overlay_window.skill_timers.append(self)
             self.timer.start(self.timer_interval)
+
 
     def update_progress(self):
         """
@@ -177,7 +187,28 @@ class SkillTimer:
             self.is_running = False
             self.timer.stop()
             self._update_progress_bar_format(0, completed=True) # 计时结束时更新进度条格式，传入剩余秒数 0 和 completed=True
-            self.overlay_window.remove_timer_progress_bar(self)
+            if self.show_progress_bar:
+                self.overlay_window.remove_timer_progress_bar(self)
+            else:
+                self.overlay_window.skill_timers.remove(self)
+
+             #  -----  新增：触发其他计时器  -----
+            boss_name = self.main_window.boss_selection_combobox.currentText() # 获取当前选中的 Boss 名称
+            skill_data = self.main_window.data_manager.get_skill_data_by_name(boss_name, self.skill_name) # 获取 Boss 数据
+            
+            if skill_data:
+                triggered_skill_names = skill_data.get('triggered_skills', []) # 获取 triggered_skills 列表
+                if triggered_skill_names:
+                    print(f"技能 '{self.skill_name}' 结束，触发以下技能: {triggered_skill_names}")
+                    for triggered_skill_name in triggered_skill_names:
+                        triggered_skill_data = self.main_window.data_manager.get_skill_data_by_name(boss_name, triggered_skill_name) # 获取被触发技能的数据
+                        if triggered_skill_data:
+                            print(f"  - 启动被触发技能: {triggered_skill_data.get('name')}")                            
+                            self.main_window.try_start_new_timer(triggered_skill_data)
+                        else:
+                            print(f"  - 警告: 被触发技能 '{triggered_skill_name}' 数据未找到")
+            #  -----  触发其他计时器结束  -----
+
 
     def _update_progress_bar_format(self, remaining_milliseconds=None, completed=False):
         """
@@ -192,44 +223,3 @@ class SkillTimer:
 
         self.progress_bar.setFormat(format_text) # 设置新的进度条格式
 
-
-import time # 导入 time 模块
-
-class ProgressBarWorkerThread(QThread):
-    """
-    工作线程，负责后台更新进度条的值。
-    """
-    progress_updated = pyqtSignal(int) # 定义信号，用于通知 SkillTimer 进度更新
-
-    def __init__(self, duration_seconds):
-        super().__init__()
-        self.duration_seconds = duration_seconds
-        self.max_value = duration_seconds * 10 # 对应 SkillTimer 中进度条的 range 设置
-        self.current_value = 0
-        self.is_running = False
-        self.elapsed_seconds = 0.0 # 线程内部计时
-
-    def run(self):
-        """
-        线程运行函数，执行后台进度更新任务。
-        """
-        self.is_running = True
-        start_time = time.time() # 记录开始时间
-        while self.is_running and self.elapsed_seconds < self.duration_seconds:
-            time.sleep(0.02) # 模拟耗时操作，减少 CPU 占用，20ms 间隔，与新的定时器间隔一致
-            self.elapsed_seconds = time.time() - start_time # 计算已逝去的时间
-            progress_value = int(self.elapsed_seconds * 10) # 根据时间计算进度值
-            if progress_value > self.max_value:
-                progress_value = self.max_value # 确保不超过最大值
-            self.progress_updated.emit(progress_value) # 发射信号，传递当前进度值
-
-        self.is_running = False
-        self.progress_updated.emit(self.max_value) # 确保最后进度达到 100%
-
-
-    def stop_worker(self):
-        """
-        停止工作线程。
-        """
-        self.is_running = False
-        self.wait() # 等待线程安全退出

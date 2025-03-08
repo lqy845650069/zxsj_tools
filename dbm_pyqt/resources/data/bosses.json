@@ -1,29 +1,44 @@
 [
     {
         "id": 1,
-        "name": "首领A",
-        "description": "这是一个强大的首领A，拥有多种危险技能。",
+        "name": "10人噩梦辟邪",
+        "description": "10人噩梦辟邪",
         "skills": [
           {
-            "name": "技能1：高伤害单体攻击",
+            "name": "开始",
             "trigger_condition": "unconditional",
-            "countdown_duration": 15,
-            "progress_bar_text": "单体高伤",
-            "progress_bar_color": "red"
-          },
-          {
-            "name": "技能2：范围 AoE 伤害",
-            "trigger_condition": "unconditional",
-            "countdown_duration": 20,
-            "progress_bar_text": "躲避AoE",
+            "countdown_duration": 5,
+            "progress_bar_text": "开始",
+            "show": true,
+            "triggered_skills": ["循环检测"],
             "progress_bar_color": "#FFA500"
           },
           {
-            "name": "技能3：召唤小怪",
+            "name": "循环检测",
             "trigger_condition": "unconditional",
-            "countdown_duration": 30,
-            "progress_bar_text": "打断召唤",
-            "progress_bar_color": "blue"
+            "countdown_duration": 1,
+            "progress_bar_text": "循环检测",
+            "show": false,
+            "triggered_skills": ["循环检测", "开战检测"],
+            "progress_bar_color": "#FFA500"
+          },
+          {
+            "name": "开战检测",
+            "trigger_condition": "condition_image",
+            "countdown_duration": 2,
+            "progress_bar_text": "开战",
+            "progress_bar_color": "red",
+            "show": false,
+            "triggered_skills": ["面向冲锋"],
+            "param": "10_h_px/kaizhan.png"
+          },
+          {
+            "name": "面向冲锋",
+            "trigger_condition": "unconditional",
+            "countdown_duration": 5,
+            "progress_bar_text": "面向冲锋",
+            "progress_bar_color": "red",
+            "show": true
           }
         ]
       },
@@ -33,13 +48,13 @@
       "description": "首领B擅长控制技能，需要注意躲避。",
       "skills": [
         {
-          "name": "技能1：群体控制",
+          "name": "技能1:群体控制",
           "trigger_condition": "unconditional",
           "countdown_duration": 10,
           "progress_bar_text": "注意控制"
         },
         {
-          "name": "技能2：降低移动速度",
+          "name": "技能2:降低移动速度",
           "trigger_condition": "time",
           "countdown_duration": 12,
           "progress_bar_text": "减速躲避"
@@ -52,13 +67,13 @@
       "description": "这是一个速度很快的首领C，需要快速反应。",
       "skills": [
         {
-          "name": "技能1：快速移动",
+          "name": "技能1:快速移动",
           "trigger_condition": "unconditional",
           "countdown_duration": 8,
           "progress_bar_text": "快速移动"
         },
         {
-          "name": "技能2：连续攻击",
+          "name": "技能2:连续攻击",
           "trigger_condition": "time",
           "countdown_duration": 5,
           "progress_bar_text": "连续攻击"

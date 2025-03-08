@@ -1,6 +1,7 @@
 # src/core/data_manager.py
 import json
 import os
+from src.utils.resource import get_resource_path
 
 class DataManager:
     def __init__(self):
@@ -14,7 +15,7 @@ class DataManager:
         从 JSON 文件加载 Boss 数据和技能数据。
         """
         try:
-            with open(self.boss_data_file, 'r', encoding='utf-8') as f:
+            with open(get_resource_path(self.boss_data_file), 'r', encoding='utf-8') as f:
                 self.boss_data = json.load(f)
             print(f"成功加载 Boss 数据，共 {len(self.boss_data)} 个 Boss.")
             self._process_skill_data() #  加载 Boss 数据后，处理技能数据
@@ -56,3 +57,14 @@ class DataManager:
         根据 Boss 名称获取技能数据。
         """
         return self.boss_skill_data_map.get(boss_name, []) #  如果找不到 Boss 的技能数据，返回空列表
+    
+    def get_skill_data_by_name(self, boss_name, skill_name):
+        """
+        根据 Boss 名称和技能名称查找并返回技能数据字典。
+        """
+        skill_data_list = self.get_boss_skill_data(boss_name)
+        if skill_data_list:
+            for skill_data in skill_data_list:
+                if skill_data.get('name') == skill_name:
+                    return skill_data # 找到匹配的技能数据，返回字典
+        return None # 如果 Boss 或技能未找到，返回 None
