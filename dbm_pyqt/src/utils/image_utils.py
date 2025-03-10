@@ -3,9 +3,14 @@ import cv2
 import pygetwindow as gw
 import pyautogui
 import numpy as np
+import os
+import json
+from .config_reader import Config
+from PIL import Image
 
 
 def detect_image_on_screen(image_path):
+    config = Config()
     windows = gw.getWindowsWithTitle('ZhuxianClient')
     if not windows:
         print("窗口未找到")
@@ -18,7 +23,7 @@ def detect_image_on_screen(image_path):
 
         # 获取窗口的位置和大小
         left, top, width, height = window.left, window.top, window.width, window.height
-
+        print(f"窗口位置: ({left}, {top}), 大小: ({width}, {height})")
         # 读取模板图像
         template = cv2.imread(image_path, cv2.IMREAD_COLOR)
 
@@ -26,10 +31,11 @@ def detect_image_on_screen(image_path):
             return False
 
         # 设置匹配阈值
-        threshold = 0.9
+        threshold = 0.7
 
         # 获取窗口截图
         screenshot = pyautogui.screenshot(region=(left, top, width, height))
+        screenshot = screenshot.resize([config.get("screenshot_default_width"), config.get("screenshot_default_height")], Image.Resampling.BILINEAR)
         screenshot = np.array(screenshot)
 
         # 转换颜色通道顺序（从 BGR 到 RGB）

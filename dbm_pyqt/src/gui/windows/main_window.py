@@ -56,6 +56,7 @@ class DBMWindow(QWidget):
         self.overlay_window.show()
         self.is_edit_mode_enabled = False
         self.start_trigger_check_thread() #  启动触发检查线程  <--- 启动线程
+        self.forbidden_timer_names = set()
 
 
     def closeEvent(self, event):
@@ -98,6 +99,8 @@ class DBMWindow(QWidget):
     def on_boss_item_clicked(self, item):
         # ... (on_boss_item_clicked 方法保持不变) ...
         self.boss_description_label.setTextFormat(Qt.RichText)
+        self.forbidden_timer_names.clear()
+
 
     def on_boss_selected(self, index):
         """
@@ -149,10 +152,17 @@ class DBMWindow(QWidget):
                 for skill_data in skill_data_list:
                     if skill_data.get('name') == skill_name: #  找到对应的技能数据
                         skill_name = skill_data.get('name')
+                        if skill_name in self.forbidden_timer_names:
+                            print(f"技能 '{skill_name}' 被禁用，跳过")
+                            continue
                         duration_seconds = skill_data.get('countdown_duration')
                         progress_bar_text = skill_data.get('progress_bar_text', "")
                         progress_bar_color = skill_data.get('progress_bar_color')
                         show_progress = skill_data.get('show', True)
+                        
+                        forbidden_timer_names = skill_data.get('forbidden_timer_names', [])
+                        for forbidden_timer_name in forbidden_timer_names:
+                            self.forbidden_timer_names.add(forbidden_timer_name)
 
                         skill_timer = SkillTimer(skill_name, duration_seconds, self.overlay_window, self, progress_bar_text, progress_bar_color, show_progress)
                         skill_timer.start_timer()
